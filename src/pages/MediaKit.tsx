@@ -80,33 +80,27 @@ export const MediaKit: React.FC = () => {
         if (reels.length > 0) {
           setLiveReels(reels);
           
-          // Buscar métricas do usuário (seguidores)
-          const userUrl = `https://graph.instagram.com/me?fields=followers_count&access_token=${INSTAGRAM_ACCESS_TOKEN}`;
+          // Buscar métricas do usuário (seguidores) e engajamento dos posts
+          const userUrl = `https://graph.instagram.com/me?fields=followers_count,media{like_count,comments_count}&access_token=${INSTAGRAM_ACCESS_TOKEN}`;
           const userResponse = await fetch(userUrl);
           const userData = await userResponse.json();
           
-          // Buscar métricas de engajamento dos últimos posts para calcular média
-          const mediaIds = data.data.slice(0, 10).map((m: any) => m.id);
-          let totalInteractions = 0;
+          const followers = userData.followers_count || 597;
+          const mediaList = userData.media?.data || [];
+          const recentMedia = mediaList.slice(0, 12);
           
-          for (const id of mediaIds) {
-            const insightUrl = `https://graph.instagram.com/${id}/insights?metric=engagement,reach&access_token=${INSTAGRAM_ACCESS_TOKEN}`;
-            const insightRes = await fetch(insightUrl);
-            const insightData = await insightRes.json();
-            if (insightData.data) {
-              const engagement = insightData.data.find((m: any) => m.name === 'engagement')?.values[0]?.value || 0;
-              totalInteractions += engagement;
-            }
-          }
+          let totalInteractions = 0;
+          recentMedia.forEach((m: any) => {
+            totalInteractions += (m.like_count || 0) + (m.comments_count || 0);
+          });
 
-          const avgInteractions = mediaIds.length > 0 ? Math.round(totalInteractions / mediaIds.length) : 43200;
-          const followers = userData.followers_count || 250;
+          const avgInteractions = recentMedia.length > 0 ? Math.round(totalInteractions / recentMedia.length) : 0;
           
           setStats({
             followers: followers,
-            reach: Math.round(followers * 50), // Estimativa baseada em seguidores se o insight de alcance falhar
+            reach: Math.round(followers * 45.5), // Estimativa de alcance baseada em benchmarks de Reels
             interactions: totalInteractions,
-            engagementRate: followers > 0 ? Number(((totalInteractions / mediaIds.length) / followers * 100).toFixed(1)) : 19.8
+            engagementRate: followers > 0 ? Number((avgInteractions / followers * 100).toFixed(1)) : 19.8
           });
         } else {
           setLiveReels(REELS_DATA);
