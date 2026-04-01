@@ -93,7 +93,9 @@ export const Header: React.FC = () => {
         className="absolute z-10"
       >
         <motion.div 
+          initial={false}
           animate={{ borderRadius: imgConfig.borderRadius }}
+          style={{ borderRadius: imgConfig.borderRadius }}
           className={`w-full h-full bg-[#fcf7f9] overflow-hidden border-[#fcf7f9] transition-all duration-300 ease-in-out ${(isHome && isScrolled) ? 'border-2 shadow-sm' : 'border-4 shadow-md'}`}
         >
           <img src={data.settings.profileImage} alt="Renata Lugon" className="w-full h-full object-cover" referrerPolicy="no-referrer" />
