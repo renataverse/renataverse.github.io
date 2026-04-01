@@ -1,7 +1,42 @@
 import React, { useState, useEffect } from 'react';
 import { motion, useScroll } from 'motion/react';
-import { Instagram, Youtube } from 'lucide-react';
+import { Instagram, Youtube, Play } from 'lucide-react';
 import { useData } from '../context/DataContext';
+
+const INSTAGRAM_ACCESS_TOKEN = "IGAAX3WGOV96ZABZAFlpRzRPQlZAaakNmSGJSQmFfVHkyWDVjemZAVWHB4MU5OR2N0bGtFQXB1QXBSNWZAUazFCRjZAUaFlrUHVNZA3BPOEd5T1Nva25GT3NkUUIyY3UzXy02VWdUSWdYamNCWl90Y2tpaWpHNDhXRkNMNjg1NHhTZADBhcwZDZD";
+
+const REELS_DATA = [
+  { 
+    id: 1, 
+    img: 'https://images.unsplash.com/photo-1544947950-fa07a98d237f?q=80&w=400&auto=format&fit=crop',
+    link: 'https://www.instagram.com/renataverso/reels/'
+  },
+  { 
+    id: 2, 
+    img: 'https://images.unsplash.com/photo-1589829085413-56de8ae18c73?q=80&w=400&auto=format&fit=crop',
+    link: 'https://www.instagram.com/renataverso/reels/'
+  },
+  { 
+    id: 3, 
+    img: 'https://images.unsplash.com/photo-1507842217343-583bb7270b66?q=80&w=400&auto=format&fit=crop',
+    link: 'https://www.instagram.com/renataverso/reels/'
+  },
+  { 
+    id: 4, 
+    img: 'https://images.unsplash.com/photo-1524995997946-a1c2e315a42f?q=80&w=400&auto=format&fit=crop',
+    link: 'https://www.instagram.com/renataverso/reels/'
+  },
+  { 
+    id: 5, 
+    img: 'https://images.unsplash.com/photo-1512820790803-83ca734da794?q=80&w=400&auto=format&fit=crop',
+    link: 'https://www.instagram.com/renataverso/reels/'
+  },
+  { 
+    id: 6, 
+    img: 'https://images.unsplash.com/photo-1495640388908-05fa85288e61?q=80&w=400&auto=format&fit=crop',
+    link: 'https://www.instagram.com/renataverso/reels/'
+  }
+];
 
 const TikTokIcon = ({ size = 24, className = "" }: { size?: number, className?: string }) => (
   <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}>
@@ -13,6 +48,50 @@ export const MediaKit: React.FC = () => {
   const { data } = useData();
   const { scrollY } = useScroll();
   const [isScrolled, setIsScrolled] = useState(false);
+  const [liveReels, setLiveReels] = useState(REELS_DATA);
+  const [isLoading, setIsLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchInstagramFeed = async () => {
+      if (!INSTAGRAM_ACCESS_TOKEN) {
+        setLiveReels(REELS_DATA);
+        setIsLoading(false);
+        return;
+      }
+
+      try {
+        const url = `https://graph.instagram.com/me/media?fields=id,media_type,media_url,thumbnail_url,permalink&access_token=${INSTAGRAM_ACCESS_TOKEN}`;
+        const response = await fetch(url);
+        const data = await response.json();
+        
+        if (data.error) {
+          throw new Error(data.error.message);
+        }
+
+        const reels = data.data
+          .filter((post: any) => post.media_type === 'VIDEO')
+          .slice(0, 6)
+          .map((post: any) => ({
+            id: post.id,
+            img: post.thumbnail_url || post.media_url,
+            link: post.permalink
+          }));
+        
+        if (reels.length > 0) {
+          setLiveReels(reels);
+        } else {
+          setLiveReels(REELS_DATA);
+        }
+      } catch (error) {
+        console.error("Erro ao carregar o feed do Instagram:", error);
+        setLiveReels(REELS_DATA);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    fetchInstagramFeed();
+  }, []);
 
   useEffect(() => {
     return scrollY.on("change", (latest) => {
@@ -46,14 +125,7 @@ export const MediaKit: React.FC = () => {
     { value: '19.8%', label: 'Média de\nEngajamento' }
   ];
 
-  const portfolioImages = [
-    'https://images.unsplash.com/photo-1507842217343-583bb7270b66?q=80&w=400&auto=format&fit=crop',
-    'https://images.unsplash.com/photo-1507842217343-583bb7270b66?q=80&w=400&auto=format&fit=crop',
-    'https://images.unsplash.com/photo-1507842217343-583bb7270b66?q=80&w=400&auto=format&fit=crop',
-    'https://images.unsplash.com/photo-1507842217343-583bb7270b66?q=80&w=400&auto=format&fit=crop',
-    'https://images.unsplash.com/photo-1507842217343-583bb7270b66?q=80&w=400&auto=format&fit=crop',
-    'https://images.unsplash.com/photo-1507842217343-583bb7270b66?q=80&w=400&auto=format&fit=crop'
-  ];
+
 
   return (
     <div className="relative z-10">
@@ -174,21 +246,34 @@ export const MediaKit: React.FC = () => {
           className="mb-12"
         >
           <h2 className="font-serif text-3xl font-bold text-magenta mb-6">Portfólio</h2>
-          <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
-            {portfolioImages.map((image, idx) => (
-              <motion.div 
-                key={idx}
+          <div className="grid grid-cols-2 md:grid-cols-3 gap-4 relative">
+            {isLoading && (
+              <div className="absolute inset-0 flex items-center justify-center bg-[#fcf7f9]/80 z-10 min-h-[200px]">
+                <div className="w-8 h-8 border-4 border-[#cd3b8c] border-t-transparent rounded-full animate-spin"></div>
+              </div>
+            )}
+            {liveReels.map((reel, idx) => (
+              <motion.a 
+                key={reel.id}
+                href={reel.link}
+                target="_blank"
+                rel="noopener noreferrer"
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
                 transition={{ delay: 1.1 + idx * 0.05 }}
-                className="aspect-square rounded-2xl overflow-hidden shadow-md hover:shadow-lg transition-shadow"
+                className="aspect-[4/5] rounded-2xl overflow-hidden shadow-md hover:shadow-lg transition-all hover:scale-[1.02] relative group border-2 border-magenta/20"
               >
                 <img 
-                  src={image} 
+                  src={reel.img} 
                   alt={`Portfolio ${idx + 1}`} 
-                  className="w-full h-full object-cover hover:scale-105 transition-transform duration-300"
+                  className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
+                  referrerPolicy="no-referrer"
+                  loading="lazy"
                 />
-              </motion.div>
+                <div className="absolute inset-0 bg-black/20 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+                  <Play className="text-white w-10 h-10 fill-white" />
+                </div>
+              </motion.a>
             ))}
           </div>
         </motion.div>
