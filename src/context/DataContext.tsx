@@ -76,8 +76,8 @@ const initialData: AppData = {
     bio: "Criadora de conteúdo literário que compartilha leituras, indicações e unboxings de forma autêntica, criativa e apaixonada.",
     profileImage: "https://i.imgur.com/IbxasWS.jpeg",
     instagram: "https://instagram.com/renataverso",
-    tiktok: "https://tiktok.com/@renataverso",
-    youtube: "https://youtube.com/@renataverso"
+    tiktok: "https://www.tiktok.com/@renataverso?_r=1&_t=ZS-95AS7y6QBs4",
+    youtube: "https://youtube.com/@renataslugon?si=Ldph3mIg7CIbTcf_"
   }
 };
 
