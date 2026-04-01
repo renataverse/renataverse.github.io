@@ -10,6 +10,7 @@ export const Header: React.FC = () => {
   const [isScrolled, setIsScrolled] = useState(false);
   
   const isHome = location.pathname === '/' || location.pathname === '/dev' || location.pathname === '/mediakit';
+  const isMediaKit = location.pathname === '/mediakit';
 
   useEffect(() => {
     return scrollY.on("change", (latest) => {
@@ -29,10 +30,10 @@ export const Header: React.FC = () => {
 
   const imgConfig = {
     top: isHome ? 64 : 90,
-    left: (isHome && isScrolled) ? 24 : '50%',
-    x: (isHome && isScrolled) ? 0 : '-50%',
-    size: isHome ? (isScrolled ? 50 : 224) : 120,
-    borderRadius: isHome ? (location.pathname === '/mediakit' && !isScrolled ? '40px' : '160px 160px 0 0') : '100px 100px 0 0'
+    left: (isHome && isScrolled) ? 24 : (isMediaKit ? 'calc(50% - 140px)' : '50%'),
+    x: (isHome && isScrolled) ? 0 : (isMediaKit ? 0 : '-50%'),
+    size: isHome ? (isScrolled ? 50 : (isMediaKit ? 192 : 224)) : 120,
+    borderRadius: isHome ? (isMediaKit && !isScrolled ? '40px' : '160px 160px 0 0') : '100px 100px 0 0'
   };
 
   return (
@@ -102,23 +103,30 @@ export const Header: React.FC = () => {
         </motion.div>
       </motion.div>
 
-      {/* Compact Name (Appears on scroll or home) */}
+      {/* Name and Title (Always visible on MediaKit, appears on scroll on Home) */}
       <motion.div
         initial={false}
         animate={{ 
-          opacity: (isHome && isScrolled) ? 1 : 0,
-          x: (isHome && isScrolled) ? 0 : -20,
+          opacity: (isHome && (isScrolled || isMediaKit)) ? 1 : 0,
+          x: (isHome && (isScrolled || isMediaKit)) ? 0 : -20,
+          top: (isMediaKit && !isScrolled) ? 100 : 73,
+          left: (isMediaKit && !isScrolled) ? 'calc(50% + 70px)' : 82,
         }}
         transition={{ 
-          duration: (isHome && isScrolled) ? 0.4 : 0.1, 
+          duration: 0.4, 
           ease: "easeOut",
           delay: (isHome && isScrolled) ? 0.42 : 0 
         }}
-        className="absolute top-[73px] left-[82px] z-0"
+        className="absolute z-0"
       >
-        <h1 className="font-serif font-bold text-white text-[1rem] leading-[1.25rem]">
+        <h1 className={`${(isMediaKit && !isScrolled) ? 'text-4xl md:text-5xl' : 'text-[1rem]'} font-serif font-bold text-white leading-tight`}>
           Renata Lugon
         </h1>
+        {(isMediaKit && !isScrolled) && (
+          <p className="text-white/90 text-lg font-semibold mt-2">
+            Vídeos literários
+          </p>
+        )}
       </motion.div>
     </motion.header>
   );
