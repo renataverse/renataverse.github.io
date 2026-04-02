@@ -1,17 +1,36 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { motion } from 'motion/react';
 import { useData, AppData } from '../context/DataContext';
-import { Save, Search } from 'lucide-react';
-import { AddBookModal } from '../components/AddBookModal';
+import { Save, Loader2, Key } from 'lucide-react';
 
 export const DevPanel: React.FC = () => {
-  const { data, updateData } = useData();
+  const { data, updateData, saveToGitHub } = useData();
   const [localData, setLocalData] = useState<AppData>(data);
-  const [isBookModalOpen, setIsBookModalOpen] = useState(false);
+  const [isSaving, setIsSaving] = useState(false);
+  const [githubToken, setGithubToken] = useState('');
 
-  const handleSave = () => {
-    updateData(localData);
-    alert('Alterações salvas com sucesso!');
+  useEffect(() => {
+    const savedToken = localStorage.getItem('github_token');
+    if (savedToken) setGithubToken(savedToken);
+  }, []);
+
+  const handleSave = async () => {
+    if (!githubToken) {
+      alert('Por favor, insira seu Token do GitHub para salvar permanentemente.');
+      return;
+    }
+
+    setIsSaving(true);
+    try {
+      localStorage.setItem('github_token', githubToken);
+      updateData(localData);
+      await saveToGitHub(localData, githubToken);
+      alert('Alterações salvas com sucesso no GitHub! O site será atualizado em alguns minutos.');
+    } catch (error: any) {
+      alert('Erro ao salvar no GitHub: ' + error.message);
+    } finally {
+      setIsSaving(false);
+    }
   };
 
   const updateSection = <K extends keyof AppData>(key: K, value: AppData[K]) => {
@@ -23,19 +42,33 @@ export const DevPanel: React.FC = () => {
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       exit={{ opacity: 0 }}
-      className="px-6 py-8"
+      className="px-6 py-8 max-w-4xl mx-auto"
     >
-      <div className="flex justify-between items-center mb-8">
+      <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-8">
         <h2 className="font-serif text-2xl font-bold text-magenta">
           Painel de Edição
         </h2>
-        <button 
-          onClick={handleSave}
-          className="flex items-center gap-2 bg-magenta text-white px-4 py-2 rounded-full hover:bg-magenta-dark transition-colors"
-        >
-          <Save size={18} />
-          <span>Salvar</span>
-        </button>
+        
+        <div className="flex flex-col sm:flex-row items-center gap-3 w-full md:w-auto">
+          <div className="relative w-full sm:w-64">
+            <Key className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" size={16} />
+            <input 
+              type="password"
+              placeholder="GitHub Token"
+              value={githubToken}
+              onChange={(e) => setGithubToken(e.target.value)}
+              className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-full text-sm focus:ring-2 focus:ring-magenta focus:outline-none"
+            />
+          </div>
+          <button 
+            onClick={handleSave}
+            disabled={isSaving}
+            className="flex items-center justify-center gap-2 bg-magenta text-white px-6 py-2 rounded-full hover:bg-magenta-dark transition-colors disabled:opacity-50 w-full sm:w-auto"
+          >
+            {isSaving ? <Loader2 size={18} className="animate-spin" /> : <Save size={18} />}
+            <span>{isSaving ? 'Salvando...' : 'Salvar no GitHub'}</span>
+          </button>
+        </div>
       </div>
 
       <div className="space-y-8">
@@ -145,26 +178,16 @@ export const DevPanel: React.FC = () => {
         <section className="bg-white p-6 rounded-2xl shadow-sm border border-gray-200">
           <div className="flex justify-between items-center mb-4">
             <h3 className="font-bold text-lg text-gray-800">Livros</h3>
-            <div className="flex gap-2">
-              <button 
-                onClick={() => setIsBookModalOpen(true)}
-                className="flex items-center gap-2 bg-gray-100 text-gray-700 hover:bg-gray-200 px-3 py-1.5 rounded-lg text-sm font-medium transition-colors"
-                title="Buscar Livro"
-              >
-                <Search size={16} />
-                Buscar Livro
-              </button>
-              <button 
-                onClick={() => {
-                  const newBook = { id: Date.now(), title: 'Novo Livro', author: '', cover: 'https://picsum.photos/seed/newbook/200/300', link: '' };
-                  updateSection('books', [...localData.books, newBook]);
-                }}
-                className="text-magenta hover:text-magenta-dark p-2 text-xl"
-                title="Adicionar Manualmente"
-              >
-                ➕
-              </button>
-            </div>
+            <button 
+              onClick={() => {
+                const newBook = { id: Date.now(), title: 'Novo Livro', author: '', cover: 'https://picsum.photos/seed/newbook/200/300', link: '' };
+                updateSection('books', [...localData.books, newBook]);
+              }}
+              className="text-magenta hover:text-magenta-dark p-2 text-xl"
+              title="Adicionar Manualmente"
+            >
+              ➕
+            </button>
           </div>
           <div className="space-y-4">
             {localData.books.map((book, idx) => (
@@ -281,10 +304,10 @@ export const DevPanel: React.FC = () => {
         {/* Ranking Section */}
         <section className="bg-white p-6 rounded-2xl shadow-sm border border-gray-200">
           <div className="flex justify-between items-center mb-4">
-            <h3 className="font-bold text-lg text-gray-800">Ranking</h3>
+            <h3 className="font-bold text-lg text-gray-800">Ranking Literário</h3>
             <button 
               onClick={() => {
-                const newItem = { id: Date.now(), name: 'Novo Livro', link: '' };
+                const newItem = { id: Date.now(), name: 'Novo Livro no Ranking', link: '' };
                 updateSection('ranking', [...localData.ranking, newItem]);
               }}
               className="text-magenta hover:text-magenta-dark p-2 text-xl"
@@ -296,9 +319,6 @@ export const DevPanel: React.FC = () => {
           <div className="space-y-4">
             {localData.ranking.map((item, idx) => (
               <div key={item.id} className="flex items-center gap-4 border border-gray-100 p-4 rounded-xl relative">
-                <div className="w-8 h-8 rounded-full bg-magenta text-white flex items-center justify-center font-bold flex-shrink-0">
-                  {idx + 1}
-                </div>
                 <div className="flex-grow space-y-2">
                   <input 
                     type="text" 
@@ -310,17 +330,6 @@ export const DevPanel: React.FC = () => {
                     }}
                     className="w-full border border-gray-300 rounded px-2 py-1 text-sm"
                     placeholder="Nome do Livro"
-                  />
-                  <input 
-                    type="text" 
-                    value={item.link}
-                    onChange={(e) => {
-                      const newItems = [...localData.ranking];
-                      newItems[idx].link = e.target.value;
-                      updateSection('ranking', newItems);
-                    }}
-                    className="w-full border border-gray-300 rounded px-2 py-1 text-sm"
-                    placeholder="Link (opcional)"
                   />
                 </div>
                 <button 
@@ -338,15 +347,6 @@ export const DevPanel: React.FC = () => {
           </div>
         </section>
       </div>
-
-      <AddBookModal 
-        isOpen={isBookModalOpen} 
-        onClose={() => setIsBookModalOpen(false)} 
-        onAdd={(book) => {
-          const newBook = { id: Date.now(), ...book };
-          updateSection('books', [...localData.books, newBook]);
-        }} 
-      />
     </motion.div>
   );
 };
