@@ -1,35 +1,119 @@
 {
   "buttons": [
-    { "id": 1, "label": "Livros que recomendo", "icon": "book", "link": "/livros" },
-    { "id": 2, "label": "Acessórios para o Kindle", "icon": "tablet", "link": "/acessorios" },
-    { "id": 3, "label": "Lista de desejos Amazon", "icon": "heart", "link": "https://amazon.com" },
-    { "id": 4, "label": "Ranking literário", "icon": "trophy", "link": "/ranking" }
+    {
+      "id": 1,
+      "label": "Livros que recomendo",
+      "icon": "book",
+      "link": "/livros"
+    },
+    {
+      "id": 2,
+      "label": "Acessórios para o Kindle",
+      "icon": "tablet",
+      "link": "/acessorios"
+    },
+    {
+      "id": 3,
+      "label": "Lista de desejos Amazon",
+      "icon": "heart",
+      "link": "https://www.amazon.com.br/hz/wishlist/ls/1CVAB0D42JITS?ref_=wl_share"
+    },
+    {
+      "id": 4,
+      "label": "Ranking literário",
+      "icon": "trophy",
+      "link": "/ranking"
+    }
   ],
   "books": [
-    { "id": 1, "title": "Alchemised", "author": "", "cover": "https://picsum.photos/seed/alchemised/200/300", "link": "" },
-    { "id": 2, "title": "Reino de Cinzas", "author": "Sarah J. Maas", "cover": "https://picsum.photos/seed/reinodecinzas/200/300", "link": "" },
-    { "id": 3, "title": "A Serpente e as Asas Feitas de Noite", "author": "", "cover": "https://picsum.photos/seed/serpente/200/300", "link": "" },
-    { "id": 4, "title": "Tempestade de Ônix", "author": "", "cover": "https://picsum.photos/seed/tempestade/200/300", "link": "" }
+    {
+      "id": 1,
+      "title": "Alchemised",
+      "author": "",
+      "cover": "https://picsum.photos/seed/alchemised/200/300",
+      "link": ""
+    },
+    {
+      "id": 2,
+      "title": "Reino de Cinzas",
+      "author": "Sarah J. Maas",
+      "cover": "https://picsum.photos/seed/reinodecinzas/200/300",
+      "link": ""
+    },
+    {
+      "id": 3,
+      "title": "A Serpente e as Asas Feitas de Noite",
+      "author": "",
+      "cover": "https://picsum.photos/seed/serpente/200/300",
+      "link": ""
+    },
+    {
+      "id": 4,
+      "title": "Tempestade de Ônix",
+      "author": "",
+      "cover": "https://picsum.photos/seed/tempestade/200/300",
+      "link": ""
+    }
   ],
   "accessories": [
-    { "id": 1, "name": "Laço rosa", "image": "https://picsum.photos/seed/laco/200/200", "link": "" },
-    { "id": 2, "name": "Capinha magsafe", "image": "https://picsum.photos/seed/capinha/200/200", "link": "" },
-    { "id": 3, "name": "Popsocket moranguinho", "image": "https://picsum.photos/seed/popsocket/200/200", "link": "" },
-    { "id": 4, "name": "Necessaire", "image": "https://picsum.photos/seed/necessaire/200/200", "link": "" }
+    {
+      "id": 1,
+      "name": "Laço rosa",
+      "image": "https://picsum.photos/seed/laco/200/200",
+      "link": ""
+    },
+    {
+      "id": 2,
+      "name": "Capinha magsafe",
+      "image": "https://picsum.photos/seed/capinha/200/200",
+      "link": ""
+    },
+    {
+      "id": 3,
+      "name": "Popsocket moranguinho",
+      "image": "https://picsum.photos/seed/popsocket/200/200",
+      "link": ""
+    },
+    {
+      "id": 4,
+      "name": "Necessaire",
+      "image": "https://picsum.photos/seed/necessaire/200/200",
+      "link": ""
+    }
   ],
   "ranking": [
-    { "id": 1, "name": "Corte de Névoa e Fúria", "link": "" },
-    { "id": 2, "name": "Quarta Asa", "link": "" },
-    { "id": 3, "name": "Corte de Chamas Prateadas", "link": "" },
-    { "id": 4, "name": "Rainha das sombras", "link": "" },
-    { "id": 5, "name": "A Lâmina da Assassina", "link": "" }
+    {
+      "id": 1,
+      "name": "Corte de Névoa e Fúria",
+      "link": ""
+    },
+    {
+      "id": 2,
+      "name": "Quarta Asa",
+      "link": ""
+    },
+    {
+      "id": 3,
+      "name": "Corte de Chamas Prateadas",
+      "link": ""
+    },
+    {
+      "id": 4,
+      "name": "Rainha das sombras",
+      "link": ""
+    },
+    {
+      "id": 5,
+      "name": "A Lâmina da Assassina",
+      "link": ""
+    }
   ],
   "settings": {
     "email": "renataverso13@gmail.com",
     "bio": "Criadora de conteúdo literário que compartilha leituras, indicações e unboxings de forma autêntica, criativa e apaixonada.",
     "profileImage": "https://i.imgur.com/IbxasWS.jpeg",
     "instagram": "https://instagram.com/renataverso",
-    "tiktok": "https://www.tiktok.com/@renataverso?_r=1&_t=ZS-95AS7y6QBs4",
-    "youtube": "https://youtube.com/@renataslugon?si=Ldph3mIg7CIbTcf_"
+    "tiktok": "https://tiktok.com/@renataverso",
+    "youtube": "https://youtube.com/@renataverso"
   }
 }
