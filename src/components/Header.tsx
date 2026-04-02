@@ -1,15 +1,26 @@
 import React, { useState, useEffect } from 'react';
-import { motion, useScroll } from 'motion/react';
+import { motion, useScroll, AnimatePresence } from 'motion/react';
 import { useLocation } from 'react-router-dom';
 import { useData } from '../context/DataContext';
+import { Settings, X, Key } from 'lucide-react';
 
 export const Header: React.FC = () => {
-  const { data } = useData();
+  const { data, saveToGitHub } = useData();
   const location = useLocation();
   const { scrollY } = useScroll();
   const [isScrolled, setIsScrolled] = useState(false);
   
+  // Token state
+  const [githubToken, setGithubToken] = useState('');
+  const [isTokenPanelOpen, setIsTokenPanelOpen] = useState(false);
+  
+  const isDev = location.pathname.endsWith('/dev');
   const isHome = location.pathname === '/' || location.pathname === '/dev' || location.pathname === '/mediakit';
+
+  useEffect(() => {
+    const savedToken = localStorage.getItem('github_token');
+    if (savedToken) setGithubToken(savedToken);
+  }, []);
 
   useEffect(() => {
     return scrollY.on("change", (latest) => {
@@ -17,6 +28,12 @@ export const Header: React.FC = () => {
       setIsScrolled((prev) => (prev !== scrolled ? scrolled : prev));
     });
   }, [scrollY]);
+
+  const handleTokenChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const newToken = e.target.value;
+    setGithubToken(newToken);
+    localStorage.setItem('github_token', newToken);
+  };
 
   // Determine target values based on page and scroll state
   const headerHeight = isHome ? (isScrolled ? 100 : 250) : 200;
@@ -46,6 +63,47 @@ export const Header: React.FC = () => {
       }}
       className={`${isHome ? 'fixed' : 'absolute'} top-0 left-0 right-0 z-50 bg-magenta bg-pattern`}
     >
+      {/* Dev Mode Settings Button */}
+      {isDev && (
+        <div className="absolute top-4 left-4 z-[100]">
+          <button 
+            onClick={() => setIsTokenPanelOpen(!isTokenPanelOpen)}
+            className="bg-white/20 hover:bg-white/30 text-white p-2 rounded-full backdrop-blur-sm transition-all active:scale-95 border border-white/30 shadow-lg"
+            title="Configurações de Deploy"
+          >
+            {isTokenPanelOpen ? <X size={20} /> : <Settings size={20} />}
+          </button>
+
+          <AnimatePresence>
+            {isTokenPanelOpen && (
+              <motion.div 
+                initial={{ opacity: 0, x: -20 }}
+                animate={{ opacity: 1, x: 0 }}
+                exit={{ opacity: 0, x: -20 }}
+                className="absolute top-12 left-0 w-[280px]"
+              >
+                <div className="bg-white p-4 rounded-2xl shadow-2xl border border-[#ea92be] flex flex-col gap-3">
+                  <div className="flex items-center gap-2 text-[#cd3b8c] text-[10px] font-black tracking-wider uppercase">
+                    <Key size={12} />
+                    <span>GitHub Token de Acesso</span>
+                  </div>
+                  <input 
+                    type="password"
+                    placeholder="Cole seu token aqui..."
+                    value={githubToken}
+                    onChange={handleTokenChange}
+                    className="w-full px-3 py-2 border border-[#ea92be]/30 rounded-xl text-sm focus:border-[#ea92be] focus:outline-none bg-[#fcf7f9] transition-colors"
+                  />
+                  <p className="text-[9px] text-[#cd3b8c]/60 leading-tight">
+                    O token é necessário para salvar as alterações permanentemente no GitHub. Ele fica salvo apenas no seu navegador.
+                  </p>
+                </div>
+              </motion.div>
+            )}
+          </AnimatePresence>
+        </div>
+      )}
+
       {/* Background Image */}
       <div className="absolute inset-0 overflow-hidden pointer-events-none">
         <img src="https://i.imgur.com/hjYKW2Y.jpeg" alt="" className="w-full h-full object-cover opacity-10" />
@@ -123,5 +181,3 @@ export const Header: React.FC = () => {
     </motion.header>
   );
 };
-
-

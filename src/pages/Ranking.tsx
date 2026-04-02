@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
-import { motion, AnimatePresence } from 'motion/react';
+import { motion } from 'motion/react';
 import { useData } from '../context/DataContext';
-import { Trash2, Plus, Save, Key, Loader2, Settings, X } from 'lucide-react';
+import { Trash2, Plus, Save, Loader2 } from 'lucide-react';
 import { AddRankingModal } from '../components/AddRankingModal';
 import { EditRankingModal } from '../components/EditRankingModal';
 import { useNavigate } from 'react-router-dom';
@@ -11,24 +11,16 @@ export const Ranking: React.FC<{ isDev?: boolean }> = ({ isDev }) => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingItem, setEditingItem] = useState<any | null>(null);
   const [isSaving, setIsSaving] = useState(false);
-  const [githubToken, setGithubToken] = useState('');
-  const [isTokenPanelOpen, setIsTokenPanelOpen] = useState(false);
   const navigate = useNavigate();
 
-  useEffect(() => {
-    const savedToken = localStorage.getItem('github_token');
-    if (savedToken) setGithubToken(savedToken);
-  }, []);
-
   const handleSave = async () => {
+    const githubToken = localStorage.getItem('github_token');
     if (!githubToken) {
-      setIsTokenPanelOpen(true);
-      alert('Por favor, insira seu Token do GitHub no campo que aparece no topo para salvar permanentemente.');
+      alert('Por favor, insira seu Token do GitHub clicando na engrenagem no topo esquerdo para salvar permanentemente.');
       return;
     }
     setIsSaving(true);
     try {
-      localStorage.setItem('github_token', githubToken);
       await saveToGitHub(data, githubToken);
       alert('Alterações salvas com sucesso no GitHub! O site será atualizado em alguns minutos.');
       navigate('/ranking');
@@ -57,46 +49,6 @@ export const Ranking: React.FC<{ isDev?: boolean }> = ({ isDev }) => {
       exit={{ opacity: 0 }}
       className="pb-10 pt-[240px]"
     >
-      {isDev && (
-        <>
-          <button 
-            onClick={() => setIsTokenPanelOpen(!isTokenPanelOpen)}
-            className="fixed top-4 left-4 z-[9999] bg-[#ea92be] text-white p-2.5 rounded-full shadow-xl hover:bg-[#cd3b8c] transition-all active:scale-95"
-            title="Configurações de Deploy"
-          >
-            {isTokenPanelOpen ? <X size={24} /> : <Settings size={24} />}
-          </button>
-
-          <AnimatePresence>
-            {isTokenPanelOpen && (
-              <motion.div 
-                initial={{ opacity: 0, x: -20 }}
-                animate={{ opacity: 1, x: 0 }}
-                exit={{ opacity: 0, x: -20 }}
-                className="fixed top-16 left-4 z-[9999] w-full max-w-[300px]"
-              >
-                <div className="bg-white/95 backdrop-blur-md p-4 rounded-2xl shadow-2xl border-2 border-[#ea92be] flex flex-col gap-3">
-                  <div className="flex items-center gap-2 text-[#cd3b8c] text-xs font-black tracking-wider">
-                    <Key size={14} />
-                    <span>GITHUB TOKEN</span>
-                  </div>
-                  <input 
-                    type="password"
-                    placeholder="Cole seu token aqui..."
-                    value={githubToken}
-                    onChange={(e) => setGithubToken(e.target.value)}
-                    className="w-full px-3 py-2.5 border-2 border-[#ea92be]/30 rounded-xl text-sm focus:border-[#ea92be] focus:outline-none bg-white transition-colors"
-                  />
-                  <p className="text-[10px] text-[#cd3b8c]/70 leading-tight">
-                    O token é necessário para salvar as alterações permanentemente no GitHub.
-                  </p>
-                </div>
-              </motion.div>
-            )}
-          </AnimatePresence>
-        </>
-      )}
-
       <div className="border-y-2 border-[#ea92be] py-2 mb-8 bg-[#fcf7f9] relative">
         <h2 className="font-serif text-[24px] font-bold text-[#cd3b8c] text-center tracking-tight">
           Ranking literário

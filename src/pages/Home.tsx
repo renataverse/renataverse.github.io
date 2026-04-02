@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import { motion, useScroll, AnimatePresence } from 'motion/react';
-import { BookOpen, Tablet, Heart, Trophy, Link as LinkIcon, Play, Instagram, Youtube, Plus, Trash2, Save, Edit2, Key, Loader2, Settings, X } from 'lucide-react';
+import { motion, useScroll } from 'motion/react';
+import { BookOpen, Tablet, Heart, Trophy, Link as LinkIcon, Play, Instagram, Youtube, Plus, Trash2, Save, Edit2, Loader2 } from 'lucide-react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useData } from '../context/DataContext';
 import { EditSocialModal } from '../components/EditSocialModal';
@@ -47,19 +47,12 @@ export const Home: React.FC<{ isDev?: boolean }> = ({ isDev }) => {
   const [liveReels, setLiveReels] = useState(cachedInstagramFeed || REELS_DATA);
   const [isLoading, setIsLoading] = useState(!cachedInstagramFeed);
   const [isSaving, setIsSaving] = useState(false);
-  const [githubToken, setGithubToken] = useState('');
-  const [isTokenPanelOpen, setIsTokenPanelOpen] = useState(false);
   const navigate = useNavigate();
 
   const [isSocialModalOpen, setIsSocialModalOpen] = useState(false);
   const [isAddButtonModalOpen, setIsAddButtonModalOpen] = useState(false);
   const [editingButton, setEditingButton] = useState<any | null>(null);
   const [isProfileModalOpen, setIsProfileModalOpen] = useState(false);
-
-  useEffect(() => {
-    const savedToken = localStorage.getItem('github_token');
-    if (savedToken) setGithubToken(savedToken);
-  }, []);
 
   useEffect(() => {
     const fetchInstagramFeed = async () => {
@@ -106,14 +99,13 @@ export const Home: React.FC<{ isDev?: boolean }> = ({ isDev }) => {
   }, [scrollY]);
 
   const handleSave = async () => {
+    const githubToken = localStorage.getItem('github_token');
     if (!githubToken) {
-      setIsTokenPanelOpen(true);
-      alert('Por favor, insira seu Token do GitHub no campo que aparece no topo para salvar permanentemente.');
+      alert('Por favor, insira seu Token do GitHub clicando na engrenagem no topo esquerdo para salvar permanentemente.');
       return;
     }
     setIsSaving(true);
     try {
-      localStorage.setItem('github_token', githubToken);
       await saveToGitHub(data, githubToken);
       alert('Alterações salvas com sucesso no GitHub! O site será atualizado em alguns minutos.');
       navigate('/');
@@ -155,46 +147,6 @@ export const Home: React.FC<{ isDev?: boolean }> = ({ isDev }) => {
 
   return (
     <div className="relative z-10">
-      {isDev && (
-        <>
-          <button 
-            onClick={() => setIsTokenPanelOpen(!isTokenPanelOpen)}
-            className="fixed top-4 left-4 z-[9999] bg-[#ea92be] text-white p-2.5 rounded-full shadow-xl hover:bg-[#cd3b8c] transition-all active:scale-95"
-            title="Configurações de Deploy"
-          >
-            {isTokenPanelOpen ? <X size={24} /> : <Settings size={24} />}
-          </button>
-
-          <AnimatePresence>
-            {isTokenPanelOpen && (
-              <motion.div 
-                initial={{ opacity: 0, x: -20 }}
-                animate={{ opacity: 1, x: 0 }}
-                exit={{ opacity: 0, x: -20 }}
-                className="fixed top-16 left-4 z-[9999] w-full max-w-[300px]"
-              >
-                <div className="bg-white/95 backdrop-blur-md p-4 rounded-2xl shadow-2xl border-2 border-[#ea92be] flex flex-col gap-3">
-                  <div className="flex items-center gap-2 text-[#cd3b8c] text-xs font-black tracking-wider">
-                    <Key size={14} />
-                    <span>GITHUB TOKEN</span>
-                  </div>
-                  <input 
-                    type="password"
-                    placeholder="Cole seu token aqui..."
-                    value={githubToken}
-                    onChange={(e) => setGithubToken(e.target.value)}
-                    className="w-full px-3 py-2.5 border-2 border-[#ea92be]/30 rounded-xl text-sm focus:border-[#ea92be] focus:outline-none bg-white transition-colors"
-                  />
-                  <p className="text-[10px] text-[#cd3b8c]/70 leading-tight">
-                    O token é necessário para salvar as alterações permanentemente no GitHub.
-                  </p>
-                </div>
-              </motion.div>
-            )}
-          </AnimatePresence>
-        </>
-      )}
-
       <div className="fixed top-[300px] left-0 w-full text-center z-0 flex flex-col items-center">
         <h1 className="font-serif font-bold text-[#cd3b8c] text-4xl mb-1">Renata Lugon</h1>
         <p className="text-[#cd3b8c] font-medium mb-4">Vídeos literários</p>
