@@ -107,11 +107,18 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   const saveToGitHub = async (updatedData: AppData, token: string) => {
     try {
+      if (!token || token.trim() === '') {
+        throw new Error("Token do GitHub não foi fornecido. Insira o token na engrenagem (canto superior esquerdo) e tente novamente.");
+      }
+
       // Incrementa a versão a cada salvamento para invalidar o localStorage de todos os usuários
       const newVersion = (updatedData.version ?? BUNDLE_VERSION) + 1;
       const dataWithVersion: AppData = { ...updatedData, version: newVersion };
 
+      console.log(`[DEBUG] Iniciando salvamento. Versão atual: ${updatedData.version}, nova versão: ${newVersion}`);
+
       // 1. Busca o arquivo atual para obter o SHA
+      console.log(`[DEBUG] Buscando arquivo ${FILE_PATH} do repositório...`);
       const getFileResponse = await fetch(
         `https://api.github.com/repos/${REPO_OWNER}/${REPO_NAME}/contents/${FILE_PATH}`,
         {
@@ -123,15 +130,22 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
       );
 
       if (!getFileResponse.ok) {
-        throw new Error("Falha ao buscar arquivo no GitHub. Verifique se o token é válido.");
+        const errorData = await getFileResponse.json();
+        console.error(`[DEBUG] Erro ao buscar arquivo:`, errorData);
+        if (getFileResponse.status === 401 || getFileResponse.status === 403) {
+          throw new Error("Token do GitHub inválido ou expirado. Verifique o token e tente novamente.");
+        }
+        throw new Error(`Falha ao buscar arquivo no GitHub (${getFileResponse.status}): ${errorData.message || 'Erro desconhecido'}`);
       }
 
       const fileData = await getFileResponse.json();
       const sha = fileData.sha;
+      console.log(`[DEBUG] SHA obtido: ${sha}`);
 
       // 2. Atualiza o arquivo com a nova versão
       const content = btoa(unescape(encodeURIComponent(JSON.stringify(dataWithVersion, null, 2))));
-
+      console.log(`[DEBUG] Enviando atualização para o GitHub...`);
+      
       const updateResponse = await fetch(
         `https://api.github.com/repos/${REPO_OWNER}/${REPO_NAME}/contents/${FILE_PATH}`,
         {
@@ -150,16 +164,20 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
       );
 
       if (!updateResponse.ok) {
-        const error = await updateResponse.json();
-        throw new Error(error.message || "Falha ao atualizar arquivo no GitHub");
+        const errorData = await updateResponse.json();
+        console.error(`[DEBUG] Erro ao atualizar arquivo:`, errorData);
+        throw new Error(`Falha ao atualizar arquivo no GitHub (${updateResponse.status}): ${errorData.message || 'Erro desconhecido'}`);
       }
+
+      console.log(`[DEBUG] Arquivo atualizado com sucesso no GitHub!`);
 
       // Atualiza o estado local com a nova versão também
       setData(dataWithVersion);
+      localStorage.setItem(STORAGE_VERSION_KEY, String(newVersion));
 
-      console.log(`Dados salvos no GitHub com sucesso! Versão: ${newVersion}`);
+      console.log(`✅ Dados salvos no GitHub com sucesso! Versão: ${newVersion}. O site será atualizado em até 1 minuto.`);
     } catch (error) {
-      console.error("Erro ao salvar no GitHub:", error);
+      console.error("❌ Erro ao salvar no GitHub:", error);
       throw error;
     }
   };
