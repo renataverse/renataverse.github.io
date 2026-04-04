@@ -1,5 +1,5 @@
 {
-  "version": 2,
+  "version": 3,
   "buttons": [
     {
       "id": 1,
@@ -26,36 +26,7 @@
       "link": "/ranking"
     }
   ],
-  "books": [
-    {
-      "id": 1,
-      "title": "Alchemised",
-      "author": "",
-      "cover": "https://picsum.photos/seed/alchemised/200/300",
-      "link": ""
-    },
-    {
-      "id": 2,
-      "title": "Reino de Cinzas",
-      "author": "Sarah J. Maas",
-      "cover": "https://picsum.photos/seed/reinodecinzas/200/300",
-      "link": ""
-    },
-    {
-      "id": 3,
-      "title": "A Serpente e as Asas Feitas de Noite",
-      "author": "",
-      "cover": "https://picsum.photos/seed/serpente/200/300",
-      "link": ""
-    },
-    {
-      "id": 4,
-      "title": "Tempestade de Ônix",
-      "author": "",
-      "cover": "https://picsum.photos/seed/tempestade/200/300",
-      "link": ""
-    }
-  ],
+  "books": [],
   "accessories": [
     {
       "id": 1,
