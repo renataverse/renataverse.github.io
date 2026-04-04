@@ -3,7 +3,7 @@ import { motion, useScroll, AnimatePresence } from 'motion/react';
 import { useLocation } from 'react-router-dom';
 import { useData } from '../context/DataContext';
 import { Settings, X, Key, Save, Loader2 } from 'lucide-react';
-import configData from '../config.json';
+// Token será carregado via fetch da API do GitHub
 
 export const Header: React.FC = () => {
   const { data, saveToGitHub } = useData();
@@ -23,9 +23,6 @@ export const Header: React.FC = () => {
     const savedToken = localStorage.getItem('github_token');
     if (savedToken) {
       setGithubToken(savedToken);
-    } else if ((configData as any).githubToken) {
-      setGithubToken((configData as any).githubToken);
-      localStorage.setItem('github_token', (configData as any).githubToken);
     }
   }, []);
 
@@ -51,7 +48,7 @@ export const Header: React.FC = () => {
     setIsSavingToken(true);
     try {
       const getFileResponse = await fetch(
-        `https://api.github.com/repos/renataverse/renataverse.github.io/contents/src/config.json`,
+        `https://api.github.com/repos/renataverse/renataverse.github.io/contents/.github/token.json`,
         {
           headers: {
             Authorization: `token ${githubToken}`,
@@ -74,12 +71,12 @@ export const Header: React.FC = () => {
       const fileData = await getFileResponse.json();
       const sha = fileData.sha;
 
-      const newConfig = { githubToken: githubToken };
+      const newConfig = { token: githubToken };
       const content = btoa(unescape(encodeURIComponent(JSON.stringify(newConfig, null, 2))));
 
       console.log('[DEBUG] Enviando atualização do token para o GitHub...');
       const updateResponse = await fetch(
-        `https://api.github.com/repos/renataverse/renataverse.github.io/contents/src/config.json`,
+        `https://api.github.com/repos/renataverse/renataverse.github.io/contents/.github/token.json`,
         {
           method: 'PUT',
           headers: {
