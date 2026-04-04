@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { motion, useScroll, AnimatePresence } from 'motion/react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { useData } from '../context/DataContext';
-import { Settings, X, Key, ArrowLeft } from 'lucide-react';
+import { Settings, X, Key, ArrowLeft, ArrowRight } from 'lucide-react';
 
 export const Header: React.FC = () => {
   const { data } = useData();
@@ -81,14 +81,14 @@ export const Header: React.FC = () => {
     >
       {/* Back Button */}
       {showBackButton && (
-        <div className="fixed top-4 left-4 z-[9999] pointer-events-auto">
+        <div className={`fixed top-4 ${isMediaKit ? 'right-4' : 'left-4'} z-[9999] pointer-events-auto`}>
           <button 
             onClick={handleBack}
             className="bg-white/40 hover:bg-white/60 text-white p-3 rounded-full backdrop-blur-md transition-all active:scale-95 border-2 border-white shadow-2xl hover:shadow-3xl"
             title="Voltar"
             style={{ minWidth: '48px', minHeight: '48px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
           >
-            <ArrowLeft size={24} />
+            {isMediaKit ? <ArrowRight size={24} /> : <ArrowLeft size={24} />}
           </button>
         </div>
       )}
@@ -109,7 +109,7 @@ export const Header: React.FC = () => {
             )}
           </AnimatePresence>
 
-          <div className={`fixed top-4 ${showBackButton ? 'left-20' : 'left-4'} z-[9999] pointer-events-auto`}>
+          <div className={`fixed top-4 ${showBackButton && !isMediaKit ? 'left-20' : 'left-4'} z-[9999] pointer-events-auto`}>
           <button 
             onClick={() => setIsTokenPanelOpen(!isTokenPanelOpen)}
             className="bg-white/40 hover:bg-white/60 text-white p-3 rounded-full backdrop-blur-md transition-all active:scale-95 border-2 border-white shadow-2xl hover:shadow-3xl"
