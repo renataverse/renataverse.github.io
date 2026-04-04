@@ -61,7 +61,14 @@ export const Header: React.FC = () => {
       );
 
       if (!getFileResponse.ok) {
-        throw new Error('Token inválido ou sem permissão de acesso.');
+        const errorData = await getFileResponse.json();
+        console.error('[DEBUG] Erro ao buscar arquivo:', errorData);
+        if (getFileResponse.status === 404) {
+          throw new Error('Arquivo config.json não encontrado. Tente novamente em alguns segundos.');
+        } else if (getFileResponse.status === 401 || getFileResponse.status === 403) {
+          throw new Error('Token inválido ou sem permissão de escrita. Verifique se o token tem permissão "repo".');
+        }
+        throw new Error(`Erro ${getFileResponse.status}: ${errorData.message || 'Falha ao buscar arquivo'}`);
       }
 
       const fileData = await getFileResponse.json();
@@ -70,6 +77,7 @@ export const Header: React.FC = () => {
       const newConfig = { githubToken: githubToken };
       const content = btoa(unescape(encodeURIComponent(JSON.stringify(newConfig, null, 2))));
 
+      console.log('[DEBUG] Enviando atualização do token para o GitHub...');
       const updateResponse = await fetch(
         `https://api.github.com/repos/renataverse/renataverse.github.io/contents/src/config.json`,
         {
@@ -88,12 +96,17 @@ export const Header: React.FC = () => {
       );
 
       if (!updateResponse.ok) {
-        throw new Error('Falha ao salvar o token na nuvem.');
+        const errorData = await updateResponse.json();
+        console.error('[DEBUG] Erro ao atualizar arquivo:', errorData);
+        throw new Error(`Falha ao salvar o token (${updateResponse.status}): ${errorData.message || 'Erro desconhecido'}`);
       }
+
+      console.log('[DEBUG] Token salvo com sucesso no GitHub!');
 
       alert('✅ Token salvo com sucesso! Agora ele será carregado automaticamente em todos os seus dispositivos.');
       setIsTokenPanelOpen(false);
     } catch (error: any) {
+      console.error('[DEBUG] Erro completo:', error);
       alert('❌ Erro ao salvar o token: ' + error.message);
     } finally {
       setIsSavingToken(false);
