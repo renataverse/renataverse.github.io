@@ -1,5 +1,5 @@
 {
-  "version": 3,
+  "version": 4,
   "buttons": [
     {
       "id": 1,
@@ -27,32 +27,7 @@
     }
   ],
   "books": [],
-  "accessories": [
-    {
-      "id": 1,
-      "name": "Laço rosa",
-      "image": "https://picsum.photos/seed/laco/200/200",
-      "link": ""
-    },
-    {
-      "id": 2,
-      "name": "Capinha magsafe",
-      "image": "https://picsum.photos/seed/capinha/200/200",
-      "link": ""
-    },
-    {
-      "id": 3,
-      "name": "Popsocket moranguinho",
-      "image": "https://picsum.photos/seed/popsocket/200/200",
-      "link": ""
-    },
-    {
-      "id": 4,
-      "name": "Necessaire",
-      "image": "https://picsum.photos/seed/necessaire/200/200",
-      "link": ""
-    }
-  ],
+  "accessories": [],
   "ranking": [
     {
       "id": 1,
