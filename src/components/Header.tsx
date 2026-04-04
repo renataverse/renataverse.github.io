@@ -2,7 +2,8 @@ import React, { useState, useEffect } from 'react';
 import { motion, useScroll, AnimatePresence } from 'motion/react';
 import { useLocation } from 'react-router-dom';
 import { useData } from '../context/DataContext';
-import { Settings, X, Key } from 'lucide-react';
+import { Settings, X, Key, Save, Loader2 } from 'lucide-react';
+import configData from '../config.json';
 
 export const Header: React.FC = () => {
   const { data, saveToGitHub } = useData();
@@ -13,13 +14,19 @@ export const Header: React.FC = () => {
   // Token state
   const [githubToken, setGithubToken] = useState('');
   const [isTokenPanelOpen, setIsTokenPanelOpen] = useState(false);
+  const [isSavingToken, setIsSavingToken] = useState(false);
   
-  const isDev = location.pathname.endsWith('/dev');
+  const isDev = location.pathname.includes('/dev');
   const isHome = location.pathname === '/' || location.pathname === '/dev' || location.pathname === '/mediakit';
 
   useEffect(() => {
     const savedToken = localStorage.getItem('github_token');
-    if (savedToken) setGithubToken(savedToken);
+    if (savedToken) {
+      setGithubToken(savedToken);
+    } else if ((configData as any).githubToken) {
+      setGithubToken((configData as any).githubToken);
+      localStorage.setItem('github_token', (configData as any).githubToken);
+    }
   }, []);
 
   useEffect(() => {
@@ -33,6 +40,64 @@ export const Header: React.FC = () => {
     const newToken = e.target.value;
     setGithubToken(newToken);
     localStorage.setItem('github_token', newToken);
+  };
+
+  const handleSaveTokenToCloud = async () => {
+    if (!githubToken || githubToken.trim() === '') {
+      alert('Por favor, insira um token antes de salvar.');
+      return;
+    }
+
+    setIsSavingToken(true);
+    try {
+      const getFileResponse = await fetch(
+        `https://api.github.com/repos/renataverse/renataverse.github.io/contents/src/config.json`,
+        {
+          headers: {
+            Authorization: `token ${githubToken}`,
+            Accept: 'application/vnd.github.v3+json',
+          },
+        }
+      );
+
+      if (!getFileResponse.ok) {
+        throw new Error('Token inválido ou sem permissão de acesso.');
+      }
+
+      const fileData = await getFileResponse.json();
+      const sha = fileData.sha;
+
+      const newConfig = { githubToken: githubToken };
+      const content = btoa(unescape(encodeURIComponent(JSON.stringify(newConfig, null, 2))));
+
+      const updateResponse = await fetch(
+        `https://api.github.com/repos/renataverse/renataverse.github.io/contents/src/config.json`,
+        {
+          method: 'PUT',
+          headers: {
+            Authorization: `token ${githubToken}`,
+            Accept: 'application/vnd.github.v3+json',
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            message: 'chore: update github token config',
+            content: content,
+            sha: sha,
+          }),
+        }
+      );
+
+      if (!updateResponse.ok) {
+        throw new Error('Falha ao salvar o token na nuvem.');
+      }
+
+      alert('✅ Token salvo com sucesso! Agora ele será carregado automaticamente em todos os seus dispositivos.');
+      setIsTokenPanelOpen(false);
+    } catch (error: any) {
+      alert('❌ Erro ao salvar o token: ' + error.message);
+    } finally {
+      setIsSavingToken(false);
+    }
   };
 
   // Determine target values based on page and scroll state
@@ -65,13 +130,28 @@ export const Header: React.FC = () => {
     >
       {/* Dev Mode Settings Button */}
       {isDev && (
-        <div className="absolute top-4 left-4 z-[100]">
+        <>
+          {/* Overlay escuro quando o painel está aberto */}
+          <AnimatePresence>
+            {isTokenPanelOpen && (
+              <motion.div
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
+                onClick={() => setIsTokenPanelOpen(false)}
+                className="fixed inset-0 bg-black/50 z-[9998] pointer-events-auto"
+              />
+            )}
+          </AnimatePresence>
+
+          <div className="fixed top-4 left-4 z-[9999] pointer-events-auto">
           <button 
             onClick={() => setIsTokenPanelOpen(!isTokenPanelOpen)}
-            className="bg-white/20 hover:bg-white/30 text-white p-2 rounded-full backdrop-blur-sm transition-all active:scale-95 border border-white/30 shadow-lg"
-            title="Configurações de Deploy"
+            className="bg-white/40 hover:bg-white/60 text-white p-3 rounded-full backdrop-blur-md transition-all active:scale-95 border-2 border-white shadow-2xl hover:shadow-3xl"
+            title="Configurações de Deploy (Token do GitHub)"
+            style={{ minWidth: '48px', minHeight: '48px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
           >
-            {isTokenPanelOpen ? <X size={20} /> : <Settings size={20} />}
+            {isTokenPanelOpen ? <X size={24} /> : <Settings size={24} />}
           </button>
 
           <AnimatePresence>
@@ -80,9 +160,9 @@ export const Header: React.FC = () => {
                 initial={{ opacity: 0, x: -20 }}
                 animate={{ opacity: 1, x: 0 }}
                 exit={{ opacity: 0, x: -20 }}
-                className="absolute top-12 left-0 w-[280px]"
+                className="absolute top-16 left-0 w-[300px] z-[10000]"
               >
-                <div className="bg-white p-4 rounded-2xl shadow-2xl border border-[#ea92be] flex flex-col gap-3">
+                <div className="bg-white p-5 rounded-2xl shadow-2xl border-2 border-[#ea92be] flex flex-col gap-3">
                   <div className="flex items-center gap-2 text-[#cd3b8c] text-[10px] font-black tracking-wider uppercase">
                     <Key size={12} />
                     <span>GitHub Token de Acesso</span>
@@ -94,14 +174,23 @@ export const Header: React.FC = () => {
                     onChange={handleTokenChange}
                     className="w-full px-3 py-2 border border-[#ea92be]/30 rounded-xl text-sm focus:border-[#ea92be] focus:outline-none bg-[#fcf7f9] transition-colors"
                   />
-                  <p className="text-[9px] text-[#cd3b8c]/60 leading-tight">
-                    O token é necessário para salvar as alterações permanentemente no GitHub. Ele fica salvo apenas no seu navegador.
+                  <p className="text-[10px] text-[#cd3b8c]/70 leading-tight font-medium">
+                    🔐 O token é necessário para salvar as alterações permanentemente no GitHub.
                   </p>
+                  <button
+                    onClick={handleSaveTokenToCloud}
+                    disabled={isSavingToken}
+                    className="w-full bg-[#ea92be] text-white py-2 rounded-lg font-semibold flex items-center justify-center gap-2 hover:bg-[#cd3b8c] transition-colors disabled:opacity-50 text-sm"
+                  >
+                    {isSavingToken ? <Loader2 size={16} className="animate-spin" /> : <Save size={16} />}
+                    {isSavingToken ? 'Salvando...' : 'Salvar na Nuvem'}
+                  </button>
                 </div>
               </motion.div>
             )}
           </AnimatePresence>
-        </div>
+          </div>
+        </>
       )}
 
       {/* Background Image */}
