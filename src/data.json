@@ -1,5 +1,5 @@
 {
-  "version": 6,
+  "version": 7,
   "buttons": [
     {
       "id": 1,
@@ -27,7 +27,14 @@
     }
   ],
   "books": [],
-  "accessories": [],
+  "accessories": [
+    {
+      "id": 1775271102188,
+      "name": "plug",
+      "image": "https://picsum.photos/seed/acc/200/200",
+      "link": ""
+    }
+  ],
   "ranking": [
     {
       "id": 1,
